@@ -1,0 +1,150 @@
+---
+title: "Statistical Inference Assignment"
+---
+
+#### ------------------------------------------------------------------------
+#### Part 1: Exponential distribution simulation
+#### ------------------------------------------------------------------------
+
+```{r, echo=FALSE}
+x <- c("")
+for (i in 1:1000){x[i]<- mean(rexp(40,.2))}
+dens<- dnorm(as.numeric(x), mean=5, sd=5)
+plot(x,dens, main = "X-Normal: Mean = (1/.2), SD= (1/.2)", xlab = "x", ylab = "Prob Density", las=3)
+
+##drawing the theoretical center when mean is 1/.2 = 5
+abline(v=5, col="green")
+
+##drawing the calculated center of the distribution
+cMean <- mean(as.numeric(x))
+abline(v=cMean,col="red")
+
+## calculate the variance of the distribution
+cVar <-0;
+for (i in 1:1000) 
+    {    
+     cVar <- cVar + (as.numeric(x[i])-5)^2
+    }
+
+cVar <- cVar/(1000-1)
+
+## Setting up the variables
+
+a<-0; l <- c(""); u <- c("")
+
+## Calculating the percentage of the generated means that lie with the 95% conf interval
+
+for (i in 1:1000)
+  {
+    l[i]<-as.numeric(x[i]) - 1.96*5/sqrt(40)
+    u[i]<-as.numeric(x[i]) + 1.96*5/sqrt(40)
+    if(l[i]<=5 && u[i]>=5)
+      {
+      a<-a+1
+      }
+  }
+
+b<- (a/1000)*100
+   
+```
+
+Q1. In the graph the green line is the theoretical mean at 5 and the red line is calculated mean at `r cMean`.
+As you can see the calculated the theoretical mean is approx. identical.
+
+Q2. The theoretical variance is (1/.2)^2 = 25. The calculated real variance is `r cVar`. The real variance is significantly lower than the theoretical variance.
+
+
+```{r, echo=FALSE}
+par(mfrow=c(1,2))
+hist(as.numeric(x), breaks=40, main="Histogram of X ", xlab="X")
+qqnorm(as.numeric(x))
+qqline(as.numeric(x))
+```
+
+
+Q3. Looking at the histogram and the corresponding qqplot you can see that the distribution is approx. normal with slightly fat tails
+
+Q4. The approx. coverage of the confidence interval is `r a` out of 1000 or `r b` %
+
+#### -------------------------------------------------------------------
+#### Part 2 : Tooth Growth Data
+#### -------------------------------------------------------------------
+
+Basic boxplots to summarize the data visually
+
+```{r, echo=FALSE}
+
+## Loading the data
+data(ToothGrowth)
+
+## basic boxplots to summarize the data visually
+par(mfrow=c(1,2))
+boxplot(len ~ supp, data = ToothGrowth)
+boxplot(len ~ dose, data = ToothGrowth)
+```
+
+Basic data summary
+
+```{r, echo=FALSE}
+## Basic data summary 
+summary(ToothGrowth)
+```
+
+t confidence and p value results for supp categories on length
+
+```{r, echo=FALSE}
+## t confidence interval tests for supp with the assumption that variance is TRUE and FALSE
+rbind(
+t.test(len~supp, paired=FALSE, var.equal=TRUE, data=ToothGrowth)$conf,
+t.test(len~supp, paired=FALSE, var.equal=FALSE, data=ToothGrowth)$conf
+)
+
+## p value Hypothesis  for the same data
+rbind(
+t.test(len~supp, paired=FALSE, var.equal=TRUE, data=ToothGrowth)$p.value,
+t.test(len~supp, paired=FALSE, var.equal=FALSE, data=ToothGrowth)$p.value
+)
+
+```
+
+t confidence and p value results for dosage on length
+
+```{r, echo=FALSE}
+## t confidence interval tests for dose with the assumption that variance is TRUE and FALSE
+len12 <- subset(ToothGrowth, dose %in% c(1,2))
+len51 <- subset(ToothGrowth, dose %in% c(.5,1))
+len52 <- subset(ToothGrowth, dose %in% c(.5,2))
+
+rbind(
+t.test(len~dose, paired=FALSE, var.equal=TRUE, data=len12)$conf,
+t.test(len~dose, paired=FALSE, var.equal=FALSE, data=len12)$conf,
+t.test(len~dose, paired=FALSE, var.equal=TRUE, data=len51)$conf,
+t.test(len~dose, paired=FALSE, var.equal=FALSE, data=len51)$conf,
+t.test(len~dose, paired=FALSE, var.equal=TRUE, data=len52)$conf,
+t.test(len~dose, paired=FALSE, var.equal=FALSE, data=len52)$conf
+)
+
+##p value Hypothesis  for the same data
+
+
+rbind(
+t.test(len~dose, paired=FALSE, var.equal=TRUE, data=len12)$p.value,
+t.test(len~dose, paired=FALSE, var.equal=FALSE, data=len12)$p.value,
+t.test(len~dose, paired=FALSE, var.equal=TRUE, data=len51)$p.value,
+t.test(len~dose, paired=FALSE, var.equal=FALSE, data=len51)$p.value,
+t.test(len~dose, paired=FALSE, var.equal=TRUE, data=len52)$p.value,
+t.test(len~dose, paired=FALSE, var.equal=FALSE, data=len52)$p.value
+)
+
+
+```
+###### Conclusion : Impact of supplements and dosage on Tooth Length
+
+1) We can't statistically say that the supplementary types have any impact on the length. The reason is zero lies between the t confidence intervals. The p value of approx. 6 % plus is statistically significant and we can't reject the null hypothesis that there is no difference because of the supp
+
+2) Changes in Dosage between .5 to 1, .5 to 2, and 1 to 2 all has an impact on overall length. the t confidence intervals do not have zeroes and the p values are all significantly below 5%
+
+###### Assumption
+
+The key assumption is that the samples are all from the same population. 
+However the finding with this assumption as TRUE or FALSE does not change the conclusion for either impact of supplements on length or dosage on length
