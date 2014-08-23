@@ -1,0 +1,68 @@
+---
+title: "Statistical Inference Assignment"
+---
+
+#### ------------------------------------------------------------------------
+#### Part 1: Simulation exercises
+#### ------------------------------------------------------------------------
+
+```{r, echo=FALSE}
+x <- c("")
+for (i in 1:1000){x[i]<- mean(rexp(40,.2))}
+dens<- dnorm(as.numeric(x), mean=5, sd=5)
+plot(x,dens, main = "X-Normal: Mean = (1/.2), SD= (1/.2)", xlab = "x", ylab = "Prob Density", las=3)
+
+##drawing the theoretical center when mean is 1/.2 = 5
+abline(v=5, col="green")
+
+##drawing the calculated center of the distribution
+cMean <- mean(as.numeric(x))
+abline(v=cMean,col="red")
+
+## calculate the variance of the distribution
+cVar <-0;
+for (i in 1:1000) 
+    {    
+     cVar <- cVar + (as.numeric(x[i])-5)^2
+    }
+
+cVar <- cVar/(1000-1)
+
+## Setting up the variables
+
+a<-0; l <- c(""); u <- c("")
+
+## Calculating the percentage of the generated means that lie with the 95% conf interval
+
+for (i in 1:1000)
+  {
+    l[i]<-as.numeric(x[i]) - 1.96*5/sqrt(40)
+    u[i]<-as.numeric(x[i]) + 1.96*5/sqrt(40)
+    if(l[i]<=5 && u[i]>=5)
+      {
+      a<-a+1
+      }
+  }
+
+b<- (a/1000)*100
+   
+```
+
+Q1. In the graph the green line is the theoretical mean at 5 and the red line is calculated mean at `r cMean`.
+As you can see the calculated the theoretical mean is approx. identical.
+
+Q2. The theoretical variance is (1/.2)^2 = 25. The calculated real variance is `r cVar`. The real variance is significantly lower than the theoretical variance.
+
+
+```{r, echo=FALSE}
+par(mfrow=c(1,2))
+hist(as.numeric(x), breaks=40, main="Histogram of X ", xlab="X")
+qqnorm(as.numeric(x))
+qqline(as.numeric(x))
+```
+
+
+Q3. Looking at the histogram and the corresponding qqplot you can see that the distribution is approx. normal with slightly fat tails
+
+Q4. The approx. coverage of the confidence interval is `r a` out of 1000 or `r b` %
+
